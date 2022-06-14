@@ -14,7 +14,7 @@ TEXT_CHANGE_PREFIX = "diff_"
 
 STYLESHEET = "assets/htmldiffer_stylesheet.css"
 
-STRING_PREFIX = "htmldiffer"
+STRING_PREFIX = "diff"
 
 HTMLDIFFER_CLASS_STRINGS = {
     "change": "%s" % STRING_PREFIX,
