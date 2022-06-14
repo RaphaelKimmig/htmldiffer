@@ -1,7 +1,8 @@
 import os
+import re
 import difflib
 from .utils import html2list, add_style_str, is_tag
-from .settings import STYLE_STR, EXCLUDE_STRINGS_A, EXCLUDE_STRINGS_B, WHITELISTED_TAGS, ADD_STYLE
+from .settings import STYLE_STR, EXCLUDE_STRINGS_A, EXCLUDE_STRINGS_B, WHITELISTED_TAGS, ADD_STYLE, EXCLUDE_RES
 
 
 class HTMLDiffer:
@@ -60,14 +61,19 @@ def diff_tag(diff_type, text):
 
 
 def no_changes_exist(old_el, new_el):
-    old_el_str = ''.join(old_el)
-    new_el_str = ''.join(new_el)
+    old_el_str = "".join(old_el)
+    new_el_str = "".join(new_el)
+
+    for r in EXCLUDE_RES:
+        old_el_str = re.sub(r, "", old_el_str)
+        new_el_str = re.sub(r, "", new_el_str)
+
     if len(EXCLUDE_STRINGS_A):
         for s in EXCLUDE_STRINGS_A:
-            old_el_str = ''.join(old_el_str.split(s))
-    if len(EXCLUDE_STRINGS_A):
+            old_el_str = "".join(old_el_str.split(s))
+    if len(EXCLUDE_STRINGS_B):
         for s in EXCLUDE_STRINGS_B:
-            new_el_str = ''.join(new_el_str.split(s))
+            new_el_str = "".join(new_el_str.split(s))
 
     return old_el_str == new_el_str
 
