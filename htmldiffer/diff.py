@@ -1,3 +1,5 @@
+import re
+
 from bs4 import BeautifulSoup
 import difflib
 from . import settings
@@ -121,6 +123,11 @@ def add_diff_class(diff_type, original_tag):
 def no_changes_exist(old_el, new_el):
     old_el_str = "".join(old_el)
     new_el_str = "".join(new_el)
+
+    for r in settings.EXCLUDE_RES:
+        old_el_str = re.sub(r, "", old_el_str)
+        new_el_str = re.sub(r, "", new_el_str)
+
     if len(settings.EXCLUDE_STRINGS_A):
         for s in settings.EXCLUDE_STRINGS_A:
             old_el_str = "".join(old_el_str.split(s))
