@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from . import settings
 
 
-def html2list(html_string, level='word'):
+def html2list(html_string, level="word"):
     """
     :param  html_string: any ol' html string you've got
             level:  either 'word' or 'character'. If level='word', elements will be words.
@@ -25,10 +25,10 @@ def html2list(html_string, level='word'):
         result == ['<head><title>Page Title</title></head>']
     """
     # different modes for parsing
-    CHAR, TAG = 'char', 'tag'
+    CHAR, TAG = "char", "tag"
 
     mode = CHAR
-    cur = ''
+    cur = ""
     out = []
 
     # TODO: use generators
@@ -42,33 +42,35 @@ def html2list(html_string, level='word'):
             cur += c
 
             # if we see the end of the tag
-            if c == '>':
+            if c == ">":
                 out.append(cur)  # add the current element to the output
-                cur = ''         # reset the character
-                mode = CHAR      # set the mode back to character mode
+                cur = ""  # reset the character
+                mode = CHAR  # set the mode back to character mode
 
         elif mode == CHAR:
 
             # when we are in CHAR mode and see an opening tag, we must switch
-            if c == '<':
+            if c == "<":
 
                 # clear out string collected so far
                 if cur != "":
-                    out.append(cur)   # if we have already started a new element, store it
-                cur = c               # being our tag
-                mode = TAG            # swap to tag mode
-            
+                    out.append(
+                        cur
+                    )  # if we have already started a new element, store it
+                cur = c  # being our tag
+                mode = TAG  # swap to tag mode
+
             # if c is a special character, store 'word', store c, continue
             elif is_special_character(c):
                 out.append(cur)
                 out.append(c)
-                cur = ''
-            
+                cur = ""
+
             # otherwise, simply continue building up the current element
             else:
-                if level == 'word':
+                if level == "word":
                     cur += c
-                elif level == 'character':
+                elif level == "character":
                     out.append(c)
                 else:
                     raise ValueError('level must be "word" or "character"')
@@ -101,7 +103,7 @@ def html2list(html_string, level='word'):
 
 def check_html(html, encoding=None):
     if isinstance(html, BeautifulSoup):
-        html = html.prettify()    
+        html = html.prettify()
     elif os.path.isfile(html):
         with open(html, "r", encoding=encoding) as file:
             html = file.read()
@@ -115,13 +117,15 @@ def verified_blacklisted_tag(x, tag):
     check for '<' + blacklisted_tag +  ' ' or '>'
     as in: <head> or <head ...> (should not match <header if checking for <head)
     """
-    initial = x[0:len(tag) + 1 + 1]
+    initial = x[0 : len(tag) + 1 + 1]
     blacklisted_head = "<{0}".format(tag)
     return initial == (blacklisted_head + " ") or initial == (blacklisted_head + ">")
 
 
 def add_stylesheet(html_list):
-    stylesheet_tag = '<link rel="stylesheet" type="text/css" href="{}">'.format(settings.STYLESHEET)
+    stylesheet_tag = '<link rel="stylesheet" type="text/css" href="{}">'.format(
+        settings.STYLESHEET
+    )
     for idx, el in enumerate(html_list):
         if "</head>" in el:
             # add at the very end of head tag cause we is important
@@ -136,7 +140,7 @@ def extract_tagname(el):
     if not is_tag(el):
         raise Exception("Not a tag!")
 
-    tag_parts = el[el.index('<')+1:el.index('>')].replace("/", "")
+    tag_parts = el[el.index("<") + 1 : el.index(">")].replace("/", "")
     return tag_parts.split(" ")[0]
 
 
@@ -158,9 +162,9 @@ def compare_tags(tag_a, tag_b):
             changed_attributes.append(attribute)
 
     return {
-        'deleted_attributes': list(deleted_attributes),
-        'inserted_attributes': list(inserted_attributes),
-        'changed_attributes': changed_attributes,
+        "deleted_attributes": list(deleted_attributes),
+        "inserted_attributes": list(inserted_attributes),
+        "changed_attributes": changed_attributes,
     }
 
 
@@ -181,10 +185,10 @@ def chart_tag(tag_string):
     for el in t:
         if el[0] == "<":
             # grab the tag type
-            tag_parts['tag'] = el[1:]
+            tag_parts["tag"] = el[1:]
         else:
             check_element = el[:-1] if el[-1] == ">" else el
-            check_element = check_element.replace('"', '').replace('/', '')
+            check_element = check_element.replace('"', "").replace("/", "")
 
             if len(check_element.split("=")) > 1:
                 attribute, values = check_element.split("=")
@@ -192,12 +196,12 @@ def chart_tag(tag_string):
             else:
                 # if unattached elements, these are probably extra values from
                 # the previous attribute, so we add them
-                tag_parts[attribute] += ' ' + check_element
+                tag_parts[attribute] += " " + check_element
             if el[-1] == ">":
                 return tag_parts
 
 
-def get_class_decorator(name, diff_type=''):
+def get_class_decorator(name, diff_type=""):
     """returns class like `htmldiffer-tag-change`"""
     if diff_type:
         return "%s_%s" % (settings.HTMLDIFFER_CLASS_STRINGS[name], diff_type)
@@ -210,6 +214,7 @@ def get_class_decorator(name, diff_type=''):
 # ===============================
 # Note: These make assumptions about consuming valid html text. Validations should happen before these internal
 # predicate functions are used -- these are not currently used for parsing.
+
 
 def is_blacklisted_tag(tag):
     return tag in settings.BLACKLISTED_TAGS
@@ -261,6 +266,6 @@ def is_div(x):
 
 
 def is_special_character(string):
-    char_re = re.compile(r'[^a-zA-Z0-9]')
+    char_re = re.compile(r"[^a-zA-Z0-9]")
     string = char_re.search(string)
     return bool(string)
